@@ -1,0 +1,3 @@
+name: pr-validation
+run-name: Lint and validate C code
+on
