@@ -11,43 +11,31 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-latest]
-                arch: [amd64, arm64]
+                arch: [amd64]
         steps:
-            - name: Checkout code
-                uses: actions/checkout@v2
-            - name: Set up C compiler
-                uses: actions/setup-python@v2
-                with:
-                    python-version: '3.x'
-            - name: Install dependencies
-                run: sudo apt-get update && sudo apt-get install -y build-essential
-            - name: Build
-                run: |
-                    if [ ${{ matrix.arch }} == 'amd64' ]; then
-                        gcc -o wordcount main.c
-                    else
-                        gcc -o wordcount main.c -march=armv8-a
-                    fi
+            - uses: actions/checkout@v4
+            - run: sudo apt-get install -y gcc make
+            - run: make
             - name: Create release
-                id: create_release
-                uses: actions/create-release@v1
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
-                    tag_name: ${{ github.ref }}
-                    release_name: Release ${{ github.ref }}
-                    body: |
-                        Changes in this release:
-                        - Add feature A
-                        - Fix bug B
-                    draft: false
-                    prerelease: false
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                tag_name: ${{ github.ref }}
+                release_name: Release ${{ github.ref }}
+                body: |
+                  Changes in this release:
+                  - Add feature A
+                  - Fix bug B
+                draft: false
+                prerelease: false
             - name: Upload assets
-                uses: actions/upload-release-asset@v1
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
-                    upload_url: ${{ steps.create_release.outputs.upload_url }}
-                    asset_path: ./wordcount
-                    asset_name: wordcount-${{ matrix.os }}-${{ matrix.arch }}
-                    asset_content_type: application/octet-stream
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            with:
+              upload_url: ${{ steps.create_release.outputs.upload_url }}
+              asset_path: ./awc
+              asset_name: awc-${{ matrix.os }}-${{ matrix.arch }}
+              asset_content_type: application/octet-stream
