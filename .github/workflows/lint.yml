@@ -1,0 +1,17 @@
+name: pr-validation
+run-name: Lint and validate C code
+on:
+    pull_request:
+        types: [opened]
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v2
+        - name: Install dependencies
+            run: sudo apt-get install -y gcc make
+        - name: Build and run linter
+            run: |
+                make
+                gcc -Wall -Wextra -pedantic -std=c99 -fsanitize=undefined -fsanitize=address -o main main.c
+                ./main
